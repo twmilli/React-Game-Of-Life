@@ -10,7 +10,7 @@ var Cell = React.createClass({
     if (this.props.state){
       active='active';
     }
-    return (<div className={"cell " + active}></div>)
+    return (<div className={"cell " + active} data-row={this.props.row} data-col={this.props.col} onClick={this.props.handleCellClick}></div>)
   }
 });
 

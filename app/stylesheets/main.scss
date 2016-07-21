@@ -48,7 +48,8 @@ $hover: rgb(95, 247, 211);
     width: 10px;
     height: 10px;
     float: left;
-    outline: 1px solid black;
+    background-color: black;
+    outline: 1px solid white;
 
     &.active{
       background-color: $hover - 25;

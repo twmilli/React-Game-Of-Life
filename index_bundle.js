@@ -4010,7 +4010,7 @@
 
 
 	// module
-	exports.push([module.id, "#title {\n  width: 500px;\n  margin: auto;\n  text-align: center;\n  font-size: 3em; }\n\n.menu {\n  text-align: center;\n  width: 800px;\n  padding-bottom: 2rem;\n  font-size: 2em;\n  margin: auto; }\n  .menu button {\n    width: 100px;\n    padding: 1rem;\n    outline: none;\n    background-color: white;\n    border: none; }\n    .menu button:hover {\n      cursor: pointer;\n      color: #5ff7d3;\n      font-size: 1.3em; }\n\n.row {\n  margin: auto; }\n  .row.sm {\n    width: 500px; }\n  .row.md {\n    width: 700px; }\n  .row.lg {\n    width: 1000px; }\n  .row .cell {\n    width: 10px;\n    height: 10px;\n    float: left;\n    outline: 1px solid black; }\n    .row .cell.active {\n      background-color: #46deba; }\n\n.size-btns, .speed-btns {\n  display: inline-block;\n  padding: 1rem;\n  width: 100%;\n  margin: auto;\n  text-align: center; }\n  .size-btns input[type='radio'], .speed-btns input[type='radio'] {\n    display: none; }\n  .size-btns label, .speed-btns label {\n    padding: 0.5rem;\n    text-align: center;\n    cursor: pointer;\n    display: inline-block;\n    width: 5rem;\n    background-color: #5ff7d3; }\n  .size-btns input[type='radio']:checked + label, .speed-btns input[type='radio']:checked + label {\n    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.15);\n    background-color: #14ac88; }\n", ""]);
+	exports.push([module.id, "#title {\n  width: 500px;\n  margin: auto;\n  text-align: center;\n  font-size: 3em; }\n\n.menu {\n  text-align: center;\n  width: 800px;\n  padding-bottom: 2rem;\n  font-size: 2em;\n  margin: auto; }\n  .menu button {\n    width: 100px;\n    padding: 1rem;\n    outline: none;\n    background-color: white;\n    border: none; }\n    .menu button:hover {\n      cursor: pointer;\n      color: #5ff7d3;\n      font-size: 1.3em; }\n\n.row {\n  margin: auto; }\n  .row.sm {\n    width: 500px; }\n  .row.md {\n    width: 700px; }\n  .row.lg {\n    width: 1000px; }\n  .row .cell {\n    width: 10px;\n    height: 10px;\n    float: left;\n    background-color: black;\n    outline: 1px solid white; }\n    .row .cell.active {\n      background-color: #46deba; }\n\n.size-btns, .speed-btns {\n  display: inline-block;\n  padding: 1rem;\n  width: 100%;\n  margin: auto;\n  text-align: center; }\n  .size-btns input[type='radio'], .speed-btns input[type='radio'] {\n    display: none; }\n  .size-btns label, .speed-btns label {\n    padding: 0.5rem;\n    text-align: center;\n    cursor: pointer;\n    display: inline-block;\n    width: 5rem;\n    background-color: #5ff7d3; }\n  .size-btns input[type='radio']:checked + label, .speed-btns input[type='radio']:checked + label {\n    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.15);\n    background-color: #14ac88; }\n", ""]);
 
 	// exports
 
@@ -21459,6 +21459,17 @@
 	    return array;
 	  },
 
+	  handleCellClick: function (e) {
+	    var cell = e.currentTarget;
+	    var row = cell.getAttribute('data-row');
+	    var col = cell.getAttribute('data-col');
+	    var newArray = this.state.array;
+	    newArray[row][col] = true;
+	    this.setState({
+	      array: newArray
+	    });
+	  },
+
 	  populateArray: function (rows, cols) {
 	    var PERCENT_ACTIVE = 0.1;
 	    var activeCells = PERCENT_ACTIVE * rows * cols;
@@ -21501,26 +21512,30 @@
 	      activeCells--;
 	    }
 	    this.setState({
-	      array: newArray
+	      array: newArray,
+	      generation: 0
 	    });
 	  },
 
 	  clear: function () {
 	    var dim = this.getDimensions(this.state.size);
 	    this.setState({
-	      array: this.createArray(dim[0], dim[1])
+	      array: this.createArray(dim[0], dim[1]),
+	      generation: 0
 	    });
 	  },
 
-	  start: function () {
-	    this.updating = setInterval(this.update, this.getInterval(this.state.speed));
+	  start: function (speed) {
+	    if (speed == null) {
+	      speed = this.state.speed;
+	    }
+	    this.updating = setInterval(this.update, this.getInterval(speed));
 	  },
 
 	  getInterval: function (speed) {
 	    if (speed == 'slow') {
 	      return 500;
 	    } else if (speed == 'medium') {
-	      console.log('med');
 	      return 200;
 	    } else {
 	      return 50;
@@ -21533,8 +21548,15 @@
 
 	  update: function () {
 	    var array = this.state.array;
+	    var generations = this.state.generation + 1;
+	    var newArray = Helpers.update(this.state.array);
+	    if (newArray === false) {
+	      this.stop();
+	      return;
+	    }
 	    this.setState({
-	      array: Helpers.update(this.state.array)
+	      array: newArray,
+	      generation: generations
 	    });
 	  },
 
@@ -21543,6 +21565,8 @@
 	    this.setState({
 	      speed: newSpeed
 	    });
+	    this.stop();
+	    this.start(newSpeed);
 	  },
 
 	  getInitialState: function () {
@@ -21556,7 +21580,7 @@
 	  },
 
 	  componentDidMount: function () {
-	    this.update();
+	    this.start();
 	  },
 
 	  getBoardSize: function () {
@@ -21588,7 +21612,7 @@
 	          this.state.generation
 	        )
 	      ),
-	      React.createElement(Board, { boardSize: this.getBoardSize(), array: this.state.array }),
+	      React.createElement(Board, { boardSize: this.getBoardSize(), array: this.state.array, handleCellClick: this.handleCellClick }),
 	      React.createElement(SizeButtons, { size: this.state.size, onRadioChange: this.handleSizeChange }),
 	      React.createElement(SpeedButtons, { speed: this.state.speed, onRadioChange: this.handleSpeedChange })
 	    );
@@ -21606,7 +21630,7 @@
 
 	var Board = function (props) {
 	  var board = props.array.map(function (innerArray, key) {
-	    return React.createElement(Row, { content: innerArray, size: props.boardSize, key: key });
+	    return React.createElement(Row, { content: innerArray, size: props.boardSize, key: key, row: key, handleCellClick: props.handleCellClick });
 	  }.bind(this));
 	  return React.createElement(
 	    'div',
@@ -21629,8 +21653,9 @@
 
 	  render: function () {
 	    var cells = this.props.content.map(function (state, key) {
-	      return React.createElement(Cell, { state: state, key: key });
-	    });
+	      return React.createElement(Cell, { state: state, row: this.props.row, col: key, key: key, handleCellClick: this.props.handleCellClick });
+	    }.bind(this));
+
 	    return React.createElement(
 	      'div',
 	      { className: "row " + this.props.size },
@@ -21659,7 +21684,7 @@
 	    if (this.props.state) {
 	      active = 'active';
 	    }
-	    return React.createElement('div', { className: "cell " + active });
+	    return React.createElement('div', { className: "cell " + active, 'data-row': this.props.row, 'data-col': this.props.col, onClick: this.props.handleCellClick });
 	  }
 	});
 
@@ -21723,7 +21748,7 @@
 	    React.createElement(
 	      'label',
 	      { htmlFor: 'medium' },
-	      'Medium'
+	      'Moderate'
 	    ),
 	    React.createElement('input', { type: 'radio', name: 'speed', id: 'fast',
 	      onChange: props.onRadioChange, value: 'fast', checked: props.speed == 'fast' }),
@@ -21760,19 +21785,27 @@
 
 	var Helpers = {
 	  update: function (array) {
+	    var changed = false;
 	    for (var row = 0; row < array.length; row++) {
 	      for (var col = 0; col < array[0].length; col++) {
 	        var neighbors = getNumNeighbors(row, col, array);
-	        if (neighbors < 2) {
+	        var cell = array[row][col];
+	        if (cell && neighbors < 2) {
 	          array[row][col] = false;
-	        } else if (neighbors == 3) {
+	          changed = true;
+	        } else if (!cell && neighbors == 3) {
 	          array[row][col] = true;
-	        } else if (neighbors > 3) {
+	          changed = true;
+	        } else if (cell && neighbors > 3) {
 	          array[row][col] = false;
+	          changed = true;
 	        }
 	      }
 	    }
-	    return array;
+	    if (changed) {
+	      return array;
+	    }
+	    return false;
 	  }
 	};
 

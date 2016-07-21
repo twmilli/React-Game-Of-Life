@@ -12,6 +12,17 @@ var BoardContainer = React.createClass({
     return array;
   },
 
+  handleCellClick: function(e){
+    var cell = e.currentTarget;
+    var row = cell.getAttribute('data-row');
+    var col = cell.getAttribute('data-col');
+    var newArray = this.state.array;
+    newArray[row][col] = true;
+    this.setState({
+      array: newArray
+    });
+  },
+
   populateArray: function(rows, cols){
     var PERCENT_ACTIVE = 0.1;
     var activeCells = PERCENT_ACTIVE * rows * cols;
@@ -54,19 +65,24 @@ var BoardContainer = React.createClass({
       activeCells--;
     }
     this.setState({
-      array: newArray
+      array: newArray,
+      generation: 0
     });
   },
 
   clear: function(){
     var dim = this.getDimensions(this.state.size)
     this.setState({
-      array: this.createArray(dim[0], dim[1])
+      array: this.createArray(dim[0], dim[1]),
+      generation: 0
     });
   },
 
-  start: function(){
-    this.updating = setInterval(this.update, this.getInterval(this.state.speed));
+  start: function(speed){
+    if (speed == null){
+      speed = this.state.speed;
+    }
+    this.updating = setInterval(this.update, this.getInterval(speed));
   },
 
   getInterval: function(speed){
@@ -74,7 +90,6 @@ var BoardContainer = React.createClass({
       return 500;
     }
     else if (speed == 'medium'){
-      console.log('med');
       return 200;
     }
     else{
@@ -88,8 +103,15 @@ var BoardContainer = React.createClass({
 
   update:function(){
     var array = this.state.array;
+    var generations = this.state.generation+1;
+    var newArray = Helpers.update(this.state.array);
+    if (newArray === false){
+      this.stop();
+      return;
+    }
     this.setState({
-      array: Helpers.update(this.state.array)
+      array: newArray,
+      generation: generations
     });
   },
 
@@ -98,6 +120,8 @@ var BoardContainer = React.createClass({
     this.setState({
       speed: newSpeed
     });
+    this.stop();
+    this.start(newSpeed);
   },
 
   getInitialState: function(){
@@ -111,7 +135,7 @@ var BoardContainer = React.createClass({
   },
 
   componentDidMount:function(){
-    this.update();
+    this.start();
   },
 
   getBoardSize: function(){
@@ -131,7 +155,7 @@ var BoardContainer = React.createClass({
           <button id='random' className='fa fa-random' onClick={this.random}></button>
           <span> Generation: {this.state.generation}</span>
         </div>
-        <Board boardSize={this.getBoardSize()} array={this.state.array}/>
+        <Board boardSize={this.getBoardSize()} array={this.state.array} handleCellClick={this.handleCellClick}/>
         <SizeButtons size={this.state.size} onRadioChange={this.handleSizeChange}/>
         <SpeedButtons speed={this.state.speed} onRadioChange={this.handleSpeedChange} />
       </div>
