@@ -71,7 +71,8 @@ var BoardContainer = React.createClass({
   },
 
   clear: function(){
-    var dim = this.getDimensions(this.state.size)
+    var dim = this.getDimensions(this.state.size);
+    clearInterval(this.updating);
     this.setState({
       array: this.createArray(dim[0], dim[1]),
       generation: 0
@@ -107,20 +108,21 @@ var BoardContainer = React.createClass({
     var newArray = Helpers.update(this.state.array);
     if (newArray === false){
       this.stop();
-      return;
     }
-    this.setState({
-      array: newArray,
-      generation: generations
-    });
+    else{
+      this.setState({
+        array: newArray,
+        generation: generations
+      });
+    }
   },
 
   handleSpeedChange: function(e){
+    this.stop();
     var newSpeed = e.currentTarget.value;
     this.setState({
       speed: newSpeed
     });
-    this.stop();
     this.start(newSpeed);
   },
 

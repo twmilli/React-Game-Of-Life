@@ -15,7 +15,7 @@ var Board = function(props){
 
 Board.propTypes = {
   array: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.bool)).isRequired,
-  size: PropTypes.number.isRequired,
+  boardSize: PropTypes.string.isRequired,
   handleCellClick: PropTypes.func.isRequired,
 }
 
