@@ -21575,7 +21575,7 @@
 	      size: 0,
 	      array: this.populateArray(dim[0], dim[1]),
 	      generation: 0,
-	      speed: 'medium'
+	      speed: 'fast'
 	    };
 	  },
 
@@ -21627,6 +21627,7 @@
 
 	var React = __webpack_require__(2);
 	var Row = __webpack_require__(179);
+	var PropTypes = React.PropTypes;
 
 	var Board = function (props) {
 	  var board = props.array.map(function (innerArray, key) {
@@ -21639,6 +21640,12 @@
 	  );
 	};
 
+	Board.propTypes = {
+	  array: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.bool)).isRequired,
+	  size: PropTypes.number.isRequired,
+	  handleCellClick: PropTypes.func.isRequired
+	};
+
 	module.exports = Board;
 
 /***/ },
@@ -21647,6 +21654,7 @@
 
 	var React = __webpack_require__(2);
 	var Cell = __webpack_require__(180);
+	var PropTypes = React.PropTypes;
 
 	var Row = React.createClass({
 	  displayName: 'Row',
@@ -21664,6 +21672,12 @@
 	  }
 	});
 
+	Cell.propTypes = {
+	  content: PropTypes.arrayOf(PropTypes.bool),
+	  row: PropTypes.number.isRequired,
+	  handleCellClick: PropTypes.func.isRequired
+	};
+
 	module.exports = Row;
 
 /***/ },
@@ -21671,6 +21685,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var React = __webpack_require__(2);
+	var PropTypes = React.PropTypes;
 
 	var Cell = React.createClass({
 	  displayName: 'Cell',
@@ -21687,6 +21702,13 @@
 	    return React.createElement('div', { className: "cell " + active, 'data-row': this.props.row, 'data-col': this.props.col, onClick: this.props.handleCellClick });
 	  }
 	});
+
+	Cell.propTypes = {
+	  state: PropTypes.bool.isRequired,
+	  row: PropTypes.number.isRequired,
+	  col: PropTypes.number.isRequired,
+	  handleCellClick: PropTypes.func.isRequired
+	};
 
 	module.exports = Cell;
 

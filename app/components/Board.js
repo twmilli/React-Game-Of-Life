@@ -1,5 +1,6 @@
 var React = require('react');
 var Row = require('./Row');
+var PropTypes = React.PropTypes;
 
 var Board = function(props){
   var board = props.array.map(function(innerArray, key){
@@ -10,6 +11,12 @@ var Board = function(props){
         {board}
       </div>
   );
+}
+
+Board.propTypes = {
+  array: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.bool)).isRequired,
+  size: PropTypes.number.isRequired,
+  handleCellClick: PropTypes.func.isRequired,
 }
 
 module.exports = Board;
