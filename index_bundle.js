@@ -21519,6 +21519,7 @@
 
 	  clear: function () {
 	    var dim = this.getDimensions(this.state.size);
+	    clearInterval(this.updating);
 	    this.setState({
 	      array: this.createArray(dim[0], dim[1]),
 	      generation: 0
@@ -21552,20 +21553,20 @@
 	    var newArray = Helpers.update(this.state.array);
 	    if (newArray === false) {
 	      this.stop();
-	      return;
+	    } else {
+	      this.setState({
+	        array: newArray,
+	        generation: generations
+	      });
 	    }
-	    this.setState({
-	      array: newArray,
-	      generation: generations
-	    });
 	  },
 
 	  handleSpeedChange: function (e) {
+	    this.stop();
 	    var newSpeed = e.currentTarget.value;
 	    this.setState({
 	      speed: newSpeed
 	    });
-	    this.stop();
 	    this.start(newSpeed);
 	  },
 
@@ -21642,7 +21643,7 @@
 
 	Board.propTypes = {
 	  array: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.bool)).isRequired,
-	  size: PropTypes.number.isRequired,
+	  boardSize: PropTypes.string.isRequired,
 	  handleCellClick: PropTypes.func.isRequired
 	};
 
@@ -21789,17 +21790,20 @@
 /***/ function(module, exports) {
 
 	
-	var getNumNeighbors = function (row, col, array) {
+	var getActiveNeighbors = function (row, col, array) {
 	  var coordList = [[row, col + 1], [row, col - 1], [row + 1, col], [row - 1, col], [row - 1, col - 1], [row - 1, col + 1], [row + 1, col - 1], [row + 1, col + 1]];
 
 	  var count = 0;
 	  for (var i = 0; i < coordList.length; i++) {
 	    var coord = coordList[i];
 	    if (count > 3) {
-	      return count;
+	      /*return count;*/
 	    }
-	    if (coord[0] < 0 || coord[0] >= array.length || coord[1] < 0 || coord[1] >= array[0].length) {} else if (array[coord[0]][coord[1]]) {
-	      count++;
+	    if (coord[0] >= 0 && coord[0] < array.length && coord[1] >= 0 && coord[1] < array[0].length) {
+
+	      if (array[coord[0]][coord[1]] === true) {
+	        count++;
+	      }
 	    }
 	  }
 	  return count;
@@ -21807,25 +21811,29 @@
 
 	var Helpers = {
 	  update: function (array) {
+	    var newArray = [];
+	    for (var i = 0; i < array.length; i++) {
+	      newArray[i] = array[i].slice();
+	    }
 	    var changed = false;
 	    for (var row = 0; row < array.length; row++) {
 	      for (var col = 0; col < array[0].length; col++) {
-	        var neighbors = getNumNeighbors(row, col, array);
+	        var neighbors = getActiveNeighbors(row, col, array);
 	        var cell = array[row][col];
 	        if (cell && neighbors < 2) {
-	          array[row][col] = false;
+	          newArray[row][col] = false;
 	          changed = true;
 	        } else if (!cell && neighbors == 3) {
-	          array[row][col] = true;
+	          newArray[row][col] = true;
 	          changed = true;
 	        } else if (cell && neighbors > 3) {
-	          array[row][col] = false;
+	          newArray[row][col] = false;
 	          changed = true;
 	        }
 	      }
 	    }
 	    if (changed) {
-	      return array;
+	      return newArray;
 	    }
 	    return false;
 	  }
