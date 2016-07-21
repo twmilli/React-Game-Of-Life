@@ -28,22 +28,29 @@ var getNumNeighbors = function(row, col, array){
 
 var Helpers = {
   update: function(array){
+    var changed = false;
     for (var row = 0; row < array.length; row++){
       for (var col=0; col < array[0].length; col++){
         var neighbors = getNumNeighbors(row, col, array);
-        if (neighbors < 2){
+        var cell = array[row][col];
+        if (cell && neighbors < 2){
           array[row][col] = false;
+          changed = true;
         }
-        else if (neighbors == 3){
+        else if (!cell && neighbors == 3){
           array[row][col] = true;
+          changed = true;
         }
-
-        else if (neighbors > 3){
+        else if (cell && neighbors > 3){
           array[row][col] = false;
+          changed = true;
         }
       }
     }
-    return array;
+    if (changed){
+      return array;
+    }
+    return false;
   }
 }
 
