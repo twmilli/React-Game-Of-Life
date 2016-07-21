@@ -130,7 +130,7 @@ var BoardContainer = React.createClass({
       size: 0,
       array: this.populateArray(dim[0], dim[1]),
       generation: 0,
-      speed: 'medium'
+      speed: 'fast'
     });
   },
 

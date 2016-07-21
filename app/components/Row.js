@@ -1,5 +1,6 @@
 var React= require('react');
 var Cell = require('./Cell');
+var PropTypes = React.PropTypes;
 
 var Row = React.createClass({
   render: function(){
@@ -14,5 +15,11 @@ var Row = React.createClass({
     );
   }
 });
+
+Cell.propTypes = {
+  content: PropTypes.arrayOf(PropTypes.bool),
+  row: PropTypes.number.isRequired,
+  handleCellClick: PropTypes.func.isRequired
+}
 
 module.exports = Row;
